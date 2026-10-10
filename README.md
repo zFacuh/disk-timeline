@@ -11,6 +11,9 @@ que está consumiendo ese espacio.
 - 🕘 Captura automática diaria con el Programador de tareas de Windows.
 
 Sin dependencias externas: sólo Python 3.10+ (biblioteca estándar) y SQLite.
+El panel funciona offline (gráficas SVG propias, sin CDNs).
+
+![Panel de disk-timeline (datos de demo)](docs/dashboard.jpg)
 
 ## Instalación
 
@@ -68,10 +71,36 @@ archivos copiados o descomprimidos aunque conserven una fecha de modificación a
 La base de datos se guarda en `%LOCALAPPDATA%\disk-timeline\history.db`
 (se puede cambiar con la variable de entorno `DISK_TIMELINE_HOME`).
 
+## Panel web
+
+`disk-timeline serve` abre un panel local (sólo escucha en `127.0.0.1`) con:
+
+- **Indicadores**: usado, libre, cambio del último día, promedio diario y en cuántos días
+  se llenaría el disco al ritmo actual.
+- **Espacio usado** en el tiempo (30 días, 90 días, 1 año o todo).
+- **Cambio diario**: barras rojas cuando creció, azules cuando se liberó espacio.
+- **¿Qué creció?**: carpetas comparando dos capturas completas cualesquiera.
+- **Lo último que se agregó**: archivos grandes nuevos, con botón para abrirlos en el Explorador.
+- Botones para tomar una captura rápida o un escaneo completo desde el panel.
+
+## Opciones útiles
+
+| Opción | Descripción |
+|---|---|
+| `--db ARCHIVO` | usar otra base de datos (va antes del comando: `disk-timeline --db x.db status`) |
+| `snapshot --depth N` | profundidad de carpetas registradas (por defecto 3) |
+| `snapshot --min-size 50MB` | tamaño mínimo para listar un archivo como nuevo |
+| `snapshot --exclude D:\VMs` | ignorar carpetas al escanear |
+| `schedule install --quick` | programar sólo capturas rápidas (sin escaneo) |
+
 ## Desarrollo
 
 ```bash
 python -m unittest discover -s tests
+
+# Probar el panel con 60 días de historial simulado
+python scripts/make_demo_db.py demo.db
+python -m disk_timeline --db demo.db serve
 ```
 
 ## Licencia
