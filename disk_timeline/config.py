@@ -23,4 +23,7 @@ def data_dir() -> Path:
 
 
 def db_path() -> Path:
+    override = os.environ.get("DISK_TIMELINE_DB")
+    if override:
+        return Path(override)
     return data_dir() / "history.db"

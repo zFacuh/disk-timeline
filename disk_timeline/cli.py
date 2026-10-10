@@ -1,6 +1,7 @@
 """Command line interface."""
 
 import argparse
+import os
 import sys
 from datetime import datetime
 
@@ -152,6 +153,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="Historial diario del almacenamiento de tus discos.",
     )
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
+    p.add_argument("--db", metavar="ARCHIVO", help="base de datos a usar (por defecto en %%LOCALAPPDATA%%)")
     sub = p.add_subparsers(dest="command", required=True)
 
     s = sub.add_parser("snapshot", help="tomar una captura de los discos")
@@ -204,6 +206,8 @@ def main(argv=None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="replace")
     args = build_parser().parse_args(argv)
+    if args.db:
+        os.environ["DISK_TIMELINE_DB"] = os.path.abspath(args.db)
     return args.func(args)
 
 

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>disk-timeline</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>disk-timeline</h1>
+      <span class="muted">historial de almacenamiento</span>
+    </div>
+    <nav id="drive-tabs" class="tabs" role="tablist" aria-label="Discos"></nav>
+    <div class="actions">
+      <span id="job-status" class="muted" aria-live="polite"></span>
+      <button id="btn-quick" type="button" title="Registra uso y espacio libre de todos los discos (instantáneo)">Captura rápida</button>
+      <button id="btn-full" type="button" class="primary" title="Escanea carpetas y archivos nuevos del disco seleccionado">Escaneo completo</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="empty" class="card empty" hidden>
+      <h2>Todavía no hay capturas</h2>
+      <p>Tomá la primera con <b>Escaneo completo</b> o desde la terminal:</p>
+      <pre>disk-timeline snapshot</pre>
+      <p class="muted">Para un historial automático: <code>disk-timeline schedule install</code></p>
+    </div>
+
+    <section id="dashboard" hidden>
+      <div class="tiles" id="tiles"></div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Espacio usado</h2>
+          <div class="seg" id="range" role="group" aria-label="Rango">
+            <button data-days="30">30 días</button>
+            <button data-days="90">90 días</button>
+            <button data-days="365">1 año</button>
+            <button data-days="0" class="on">Todo</button>
+          </div>
+        </div>
+        <div class="chart" id="chart-used"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Cambio diario</h2>
+          <div class="legend">
+            <span><i class="sw sw-up"></i>Creció</span>
+            <span><i class="sw sw-down"></i>Se liberó</span>
+          </div>
+        </div>
+        <div class="chart" id="chart-delta"></div>
+        <details class="table-view">
+          <summary>Ver como tabla</summary>
+          <div id="daily-table"></div>
+        </details>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>¿Qué creció?</h2>
+          <div class="filters">
+            <label>Desde <select id="growth-from"></select></label>
+            <label>Hasta <select id="growth-to"></select></label>
+            <label>Nivel
+              <select id="growth-depth">
+                <option value="">Todos</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <p id="growth-note" class="muted note"></p>
+        <div id="growth-table"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Lo último que se agregó</h2>
+          <div class="seg" id="new-mode" role="group" aria-label="Archivos nuevos">
+            <button data-mode="last" class="on">Última captura</button>
+            <button data-mode="all">Historial</button>
+          </div>
+        </div>
+        <p id="new-note" class="muted note"></p>
+        <div id="new-table"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip" role="status" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
