@@ -174,7 +174,12 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def serve(host="127.0.0.1", port=8765, open_browser=True):
-    httpd = ThreadingHTTPServer((host, port), Handler)
+    try:
+        httpd = ThreadingHTTPServer((host, port), Handler)
+    except OSError as e:
+        print(f"No se pudo usar el puerto {port} ({e.strerror or e}).")
+        print(f"¿Ya está abierto el panel? Probá con otro puerto: disk-timeline serve --port {port + 1}")
+        return 1
     url = f"http://{host}:{port}/"
     print(f"Panel disponible en {url}  (Ctrl+C para salir)")
     if open_browser:

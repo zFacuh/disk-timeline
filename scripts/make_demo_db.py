@@ -21,8 +21,8 @@ MB = 1024 ** 2
 FOLDERS = {
     "C": {
         r"C:\Users": 1, r"C:\Windows": 1, r"C:\Program Files": 1,
-        r"C:\Users\facu": 2, r"C:\Users\facu\Downloads": 3, r"C:\Users\facu\Videos": 3,
-        r"C:\Users\facu\AppData": 3, r"C:\Users\facu\Documents": 3,
+        r"C:\Users\usuario": 2, r"C:\Users\usuario\Downloads": 3, r"C:\Users\usuario\Videos": 3,
+        r"C:\Users\usuario\AppData": 3, r"C:\Users\usuario\Documents": 3,
         r"C:\Program Files\Steam": 2, r"C:\Windows\WinSxS": 2,
     },
     "D": {r"D:\Juegos": 1, r"D:\Fotos": 1, r"D:\Backups": 1, r"D:\Juegos\Steam": 2},
@@ -72,7 +72,7 @@ def main(path: str, days: int = 60) -> None:
             db.insert_folder_sizes(conn, sid, folders)
             if drive == "C":
                 picks = rng.sample(NEW_FILE_NAMES, rng.randint(1, 4))
-                files = [NewFile(int(rng.uniform(20, 6000) * MB), rf"C:\Users\facu\{n}",
+                files = [NewFile(int(rng.uniform(20, 6000) * MB), rf"C:\Users\usuario\{n}",
                                  ts - rng.uniform(0, ts - since), ts - rng.uniform(0, ts - since))
                          for n in picks]
                 db.insert_new_files(conn, sid, files)

@@ -9,6 +9,16 @@ from . import __version__, analysis, config, db, drives
 from .analysis import human_size
 
 
+_connections = []
+
+
+def _connect():
+    """Open the history database; main() closes it when the command ends."""
+    conn = db.connect()
+    _connections.append(conn)
+    return conn
+
+
 def _fmt_time(ts) -> str:
     return "-" if ts is None else datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M")
 
@@ -22,7 +32,7 @@ def _resolve_drives(names) -> list[str]:
 def cmd_snapshot(args) -> int:
     from .snapshot import take_snapshot
 
-    conn = db.connect()
+    conn = _connect()
     targets = _resolve_drives(args.drives)
     for drive in targets:
         label = drives.drive_root(drive)
@@ -56,7 +66,7 @@ def cmd_snapshot(args) -> int:
 
 
 def cmd_status(args) -> int:
-    conn = db.connect()
+    conn = _connect()
     targets = [drives.normalize_drive(d) for d in args.drives] if args.drives else db.drives(conn)
     if not targets:
         print("Todavía no hay capturas. Ejecutá: disk-timeline snapshot")
@@ -83,7 +93,7 @@ def cmd_status(args) -> int:
 
 
 def cmd_growth(args) -> int:
-    conn = db.connect()
+    conn = _connect()
     drive = drives.normalize_drive(args.drive)
     g = analysis.folder_growth(conn, drive, args.from_id, args.to_id, args.depth, args.limit)
     if not g["to"]:
@@ -105,7 +115,7 @@ def cmd_growth(args) -> int:
 
 
 def cmd_new(args) -> int:
-    conn = db.connect()
+    conn = _connect()
     drive = drives.normalize_drive(args.drive)
     if args.all:
         files = analysis.recent_new_files(conn, drive, args.limit)
@@ -130,11 +140,25 @@ def cmd_new(args) -> int:
     return 0
 
 
+def cmd_list(args) -> int:
+    conn = _connect()
+    drive = drives.normalize_drive(args.drive)
+    snaps = analysis.full_snapshots(conn, drive)
+    if not snaps:
+        print(f"No hay capturas completas de {drive}:.")
+        return 1
+    print(f"Capturas completas de {drives.drive_root(drive)}\n")
+    print(f"  {'id':>5}  {'fecha':<16}  {'usado':>11}  {'archivos':>10}  {'nuevos':>6}  {'duración':>8}")
+    for s in snaps[-args.limit:]:
+        print(f"  {s['id']:>5}  {_fmt_time(s['taken_at']):<16}  {human_size(s['used']):>11}  "
+              f"{s['files_scanned'] or 0:>10,}  {s['new_files']:>6}  {s['scan_seconds'] or 0:>7.0f}s")
+    return 0
+
+
 def cmd_serve(args) -> int:
     from .server import serve
 
-    serve(args.host, args.port, open_browser=not args.no_browser)
-    return 0
+    return serve(args.host, args.port, open_browser=not args.no_browser) or 0
 
 
 def cmd_schedule(args) -> int:
@@ -188,6 +212,11 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=30)
     s.set_defaults(func=cmd_new)
 
+    s = sub.add_parser("list", help="listar las capturas completas de un disco (con su id)")
+    s.add_argument("drive")
+    s.add_argument("--limit", type=int, default=30)
+    s.set_defaults(func=cmd_list)
+
     s = sub.add_parser("serve", help="abrir el panel web con gráficas")
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=config.DEFAULT_PORT)
@@ -208,7 +237,11 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     if args.db:
         os.environ["DISK_TIMELINE_DB"] = os.path.abspath(args.db)
-    return args.func(args)
+    try:
+        return args.func(args)
+    finally:
+        while _connections:
+            _connections.pop().close()
 
 
 if __name__ == "__main__":
