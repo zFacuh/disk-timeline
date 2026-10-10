@@ -9,6 +9,10 @@ from typing import Callable, Iterable
 
 FILE_ATTRIBUTE_REPARSE_POINT = 0x400
 MIN_FOLDER_SIZE = 1024 * 1024  # folders smaller than 1 MB are not stored
+# Files at least this big are identified by inode so that hard links and paths that
+# Windows redirects to the same file (e.g. packaged apps' AppData) count only once.
+# Small files are skipped because looking up the inode costs an extra syscall on Windows.
+DEDUPE_MIN_SIZE = 16 * 1024 * 1024
 
 
 @dataclass
@@ -76,6 +80,7 @@ def scan(
 
     folders: dict[str, FolderSize] = {root: FolderSize(root, 0)}
     heap: list[NewFile] = []
+    seen_inodes: set[int] = set()
     files_scanned = 0
     errors = 0
 
@@ -108,11 +113,17 @@ def scan(
                         continue
                     if not stat.S_ISREG(st.st_mode):
                         continue
+                    size = st.st_size
+                    if size >= DEDUPE_MIN_SIZE:
+                        inode = entry.inode()
+                        if inode:
+                            if inode in seen_inodes:
+                                continue
+                            seen_inodes.add(inode)
                 except OSError:
                     errors += 1
                     continue
 
-                size = st.st_size
                 for folder in buckets:
                     folder.size += size
                     folder.file_count += 1

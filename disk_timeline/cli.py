@@ -27,9 +27,9 @@ def cmd_snapshot(args) -> int:
     for drive in targets:
         label = drives.drive_root(drive)
         if args.quick:
-            print(f"[{label}] registrando uso...")
+            print(f"[{label}] registrando uso...", flush=True)
         else:
-            print(f"[{label}] escaneando (puede tardar unos minutos)...")
+            print(f"[{label}] escaneando (puede tardar unos minutos)...", flush=True)
 
         def progress(count, current, label=label):
             print(f"  {count:>10,} archivos  {current[:90]}", file=sys.stderr)
@@ -51,7 +51,7 @@ def cmd_snapshot(args) -> int:
         if s.mode == "full":
             line += (f" | {s.files_scanned:,} archivos en {s.seconds:.0f}s"
                      f" | {s.new_files} archivos nuevos grandes | {s.errors} sin acceso")
-        print(line)
+        print(line, flush=True)
     return 0
 
 

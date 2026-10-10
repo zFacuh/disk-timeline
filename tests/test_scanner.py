@@ -64,6 +64,17 @@ class ScanTests(unittest.TestCase):
         r = self.scan(new_since=time.time() + 3600, min_new_size=0)
         self.assertEqual(r.new_files, [])
 
+    def test_hard_links_to_big_files_count_once(self):
+        big = self.root / "a" / "big.bin"
+        write(big, scanner.DEDUPE_MIN_SIZE)
+        try:
+            os.link(big, self.root / "z" / "big-link.bin")
+        except OSError:
+            self.skipTest("hard links not supported here")
+        r = self.scan(new_since=time.time() - 3600, min_new_size=scanner.DEDUPE_MIN_SIZE)
+        self.assertEqual(self.sizes(r)["."], 711 * KB + scanner.DEDUPE_MIN_SIZE)
+        self.assertEqual(len(r.new_files), 1)
+
     def test_exclude(self):
         r = self.scan(depth=3, exclude=[str(self.root / "a")])
         self.assertEqual(self.sizes(r)["."], 11 * KB)
