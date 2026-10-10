@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "disk-timeline"
+version = "0.1.0"
+description = "Historial diario del almacenamiento de tus discos: gráficas de uso y qué se agregó."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Facundo" }]
+
+[project.scripts]
+disk-timeline = "disk_timeline.cli:main"
+
+[tool.setuptools]
+packages = ["disk_timeline"]
+
+[tool.setuptools.package-data]
+disk_timeline = ["web/*"]
