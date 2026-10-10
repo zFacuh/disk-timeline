@@ -1,0 +1,40 @@
+name: Reportar un error
+description: Algo no funciona como debería
+labels: [bug]
+body:
+  - type: textarea
+    id: que-paso
+    attributes:
+      label: ¿Qué pasó?
+      description: Describí el problema y qué esperabas que pasara.
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo
+      placeholder: |
+        1. Ejecuté `disk-timeline snapshot --drives C`
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: salida
+    attributes:
+      label: Salida o mensaje de error
+      description: Pegá la salida del comando o el contenido de `%LOCALAPPDATA%\disk-timeline\scheduled.log`. Quitá las rutas privadas si hace falta.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Versión de disk-timeline
+      placeholder: "disk-timeline --version"
+    validations:
+      required: true
+  - type: input
+    id: entorno
+    attributes:
+      label: Sistema operativo y versión de Python
+      placeholder: "Windows 11 23H2, Python 3.12.4"
+    validations:
+      required: true

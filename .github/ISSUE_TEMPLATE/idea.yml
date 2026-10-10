@@ -1,0 +1,19 @@
+name: Proponer una idea
+description: Una función nueva o una mejora
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: ¿Qué problema resolvería?
+      description: Contá para qué lo usarías. Ej. "Quiero saber qué carpeta creció más en el último mes".
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: ¿Cómo te imaginás la solución?
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas que consideraste
