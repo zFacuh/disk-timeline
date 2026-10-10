@@ -46,8 +46,13 @@ def list_fixed_drives() -> list[str]:
     return drives
 
 
+def is_drive_name(name: str) -> bool:
+    return os.name == "nt" and len(normalize_drive(name)) == 1
+
+
 def get_usage(drive: str) -> DriveUsage:
-    root = drive_root(drive)
+    """Usage of a drive ("C") or of the volume containing a directory."""
+    root = drive_root(drive) if is_drive_name(drive) or os.name != "nt" else drive
     usage = shutil.disk_usage(root)
     return DriveUsage(
         drive=normalize_drive(drive),
